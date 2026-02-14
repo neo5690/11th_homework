@@ -49,6 +49,62 @@ print("y_test 크기:", y_test.shape)
 ####### A 작업자 작업 수행 #######
 
 ''' 코드 작성 바랍니다 '''
+import matplotlib.pyplot as plt
+import pandas as pd
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import accuracy_score
+
+# 모델 생성
+dt = DecisionTreeClassifier(random_state=42)
+
+# 하이퍼파라미터 후보 수정
+param_grid = {
+    'criterion': ['gini', 'entropy'],
+    'max_depth': [2, 5],
+    'min_samples_split': [2, 10],
+    'min_samples_leaf': [1, 2, 4]
+}
+
+# GridSearch 설정
+grid_search = GridSearchCV(
+    estimator=dt,
+    param_grid=param_grid,
+    cv=5,
+    scoring='accuracy',
+    n_jobs=-1
+)
+
+# 학습
+grid_search.fit(X_train, y_train)
+
+# 최적 하이퍼파라미터 출력
+print("Best parameters:", grid_search.best_params_)
+
+# 테스트 데이터 평가
+best_model1 = grid_search.best_estimator_
+y_pred = best_model1.predict(X_test)
+
+print("Best accuracy:", accuracy_score(y_test, y_pred))
+
+# Feature Importance 시각화
+importances = best_model1.feature_importances_
+feature_names = X_train.columns
+
+indices = importances.argsort()[::-1]
+
+plt.figure(figsize=(10, 6))
+plt.bar(range(len(importances)), importances[indices])
+
+plt.xticks(range(len(importances)), feature_names[indices], rotation=45)
+plt.xlabel("Feature")
+plt.ylabel("Importance")
+plt.title("Feature Importance")
+
+plt.tight_layout()
+plt.show()
+
 
 
 ####### B 작업자 작업 수행 #######
